@@ -205,19 +205,19 @@ paths:
               example:
                 user_id: 3
                 user_name: jperez
-	      	    name: Juan
-	       	    last_name: Perez
-	          	address:
-			        street: Arenales
-			        number: 2650
-			        floor_and_apartment: 2C
-			        extra_info: ''
-			        zip_code: ''
-			        neighborhood: Recoleta
-			        city: CABA
-			        province: CABA
-	          cellphone: '1233333'
-	          email: "jperez@gmail.com"
+                name: Juan
+                last_name: Perez
+                address:
+                street: Arenales
+                number: 2650
+                floor_and_apartment: 2C
+                extra_info: ''
+                zip_code: ''
+                neighborhood: Recoleta
+                city: CABA
+                province: CABA
+                cellphone: '1233333'
+                email: "jperez@gmail.com"
                 roles:
                   - driver
                   - cook
@@ -1326,12 +1326,14 @@ components:
           type: integer
         second_group_id:
           type: integer
+          
     NewRoleData:
       type: object
       properties:
         role:
           type: string
         
+
   securitySchemes:
     bearerAuth:
       type: http

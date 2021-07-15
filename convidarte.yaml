@@ -1,0 +1,1339 @@
+openapi: 3.0.1
+info:
+  title: Convidarte API
+  description: 'The Convidarte API Documentation. v1.0.0 by Luciano "Lucho" Conde, Carlos "Charlie" Desseno, Damian "El capi" Finkelstein, Joaquín "LW" Mansilla, Ivan "Ivi" Sadofschi'
+  contact:
+    email: convidartech@gmail.com
+  license:
+    name: 'AGPL-3.0'
+    url: https://www.gnu.org/licenses/agpl-3.0.en.html
+  version: 2.0.0
+externalDocs:
+  description: Find out more about Convidarte
+  url: https://convidarte.github.io
+servers:
+- url: https://app.convidarte.org.ar/api/v1
+tags:
+- name: authentication
+  description: Authentication endpoint
+- name: registration
+  description: Registration endpoint
+- name: users
+  description: User endpoints
+- name: groups
+  description: Group endpoints
+- name: admin/groups
+  description: Admin groups endpoints
+- name: admin/users
+  description: Admin users endpoints
+- name: delegate
+  description: Delegate endpoints
+- name: activation
+  description: Activation endpoints
+- name: search
+  description: search endpoints
+
+paths:
+  /auth/login:
+    post:
+      tags:
+      - authentication
+      summary: Returns a token for authorized requests.
+      description: 'Request for login. Returns the token with the expiration date. The field user_name can be the user name or the email.'
+      operationId: authLogin
+      requestBody:
+        description: Login data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginData'
+            example:
+              user_name: jperez
+              password: secreto123
+        required: true
+      responses:
+        200:
+          description: Authentication OK
+          content:
+            application/jason:
+              example:
+                token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MiwiZXhwIjoxNTg3OTUzOTA3LCJvcmlnX2lhdCI6MTU4Nzk1MDMwNywidXNlcl9uYW1lIjoiYWRtaW4ifQ.8swVNGPA4tG7cor6Wy-YHfu3dbGEhG7vOelJUcDzlDg"
+                expiration: '2020-04-26T23:18:27-03:00'
+                user:
+                  user_id: 2
+                  user_name: admin
+                  name: ''
+                  last_name: ''
+                  address:
+                    street: Calle
+                    number: 123
+                    floor_and_apartment: ''
+                    extra_info: ''
+                    zip_code: ''
+                    neighborhood: ''
+                    commune: ''
+                    city: ''
+                    province: ''
+                  cellphone: ''
+                  email: admin@gmail.com
+                  roles:
+                    - admin
+                  cook: null
+                  driver: null
+
+        401:
+          description: Authentication failed
+          content: {}
+  /auth/refresh_token:
+    post:
+      tags:
+      - authentication
+      summary: Request a new token with a new expiration date. 
+      description: 'Request a new token with a new expiration date. '
+      requestBody:
+        description: Login data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginData'
+            example:
+              user_name: jperez
+              password: secreto123
+        required: true
+      responses:
+        200:
+          description: Authentication OK
+          content:
+            application/jason:
+              example:
+                expire: '2020-04-09T18:59:51-03:00'
+                token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNTg2NDY5NTkxLCJvcmlnX2lhdCI6MTU4NjQ2NTk5MSwidXNlcl9uYW1lIjoiYWRtaW4ifQ.SdLaWLWnHIJEoiMlxtAyVuA8pv2ud_mNBOx0FCXyX8E"
+        401:
+          description: Authentication failed
+          content: {}
+      security:
+        - bearerAuth: []
+  /register:
+    post:
+      tags:
+      - registration
+      summary: Creates a user
+      description: Register a new user (allows multiple roles at the same time). If some role is not present, set that attribute in null. 
+      requestBody:
+        description: Registration data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationData'
+            example:
+              user_name: jperez
+              password: pass123
+              name: Juan
+              last_name: Perez
+              address:
+                street: Arenales
+                number: 2650
+                floor_and_apartment: 2C
+                extra_info: ''
+                zip_code: ''
+                neighborhood: Recoleta
+                city: CABA
+                province: CABA
+              cellphone: '1233333'
+              email: "jperez@gmail.com"
+              organization: ""
+              roles:
+                - driver
+                - cook
+              driver:
+                vehicle: car
+                availability:
+                  monday: true
+                  tuesday: true
+                  wednesday: true
+                  thursday: true
+                  friday: true
+                  saturday: true
+                  sunday: true
+                  morning: true
+                  afternoon: false
+                  evening: false
+              cook:
+                max_dishes: 20
+                availability:
+                  monday: true
+                  tuesday: true
+                  wednesday: true
+                  thursday: true
+                  friday: true
+                  saturday: true
+                  sunday: true
+
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              example:
+                user_id: 15
+              
+        400:
+          description: Validation failed. An error message is returned.
+          content:  {}
+        409:
+          description: Username or email already taken. An error message is returned.
+          content: {}
+  /users/{user_id}:
+    get:
+      tags:
+      - users
+      summary: Returns the profile of a user
+      description: Retrieves all the info from the specified user. Must be admin to see other’s info.
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: The user's profile.
+          content:
+            application/json:
+              example:
+                user_id: 3
+                user_name: jperez
+	      	    name: Juan
+	       	    last_name: Perez
+	          	address:
+			        street: Arenales
+			        number: 2650
+			        floor_and_apartment: 2C
+			        extra_info: ''
+			        zip_code: ''
+			        neighborhood: Recoleta
+			        city: CABA
+			        province: CABA
+	          cellphone: '1233333'
+	          email: "jperez@gmail.com"
+                roles:
+                  - driver
+                  - cook
+                cook:
+                  availability:
+                    monday: true
+                    tuesday: true
+                    wednesday: true
+                    thursday: true
+                    friday: true
+                    saturday: true
+                    sunday: true
+                  max_dishes: 20
+                driver:
+                  availability:
+                    monday: true
+                    tuesday: true
+                    wednesday: true
+                    thursday: true
+                    friday: true
+                    saturday: true
+                    sunday: true
+                    morning: true
+                    afternoon: false
+                    evening: false
+                  vehicle: car
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Not found
+          content: {}
+      security:
+        - bearerAuth: []
+    put:
+      tags:
+      - users
+      summary: "Modifies a user's profile"
+      description: "Updates the profile of a user. Same validations as in the register endpoint. The username cannot be modified (the new username will be ignored if passed). Password change is handled by a different endpoint. Admins may use this endpoint to edit the profile of any user. Each user may use it to edit their own profile. The creation and deletion of the cook and driver roles are handled by this endpoint."
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Updated profile
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserProfileData'
+            example:
+              name: Juan
+              last_name: Perez
+              address:
+                street: Arenales
+                number: 2650
+                floor_and_apartment: 2C
+                extra_info: ''
+                zip_code: ''
+                neighborhood: Recoleta
+                commune: ''
+                city: CABA
+                province: CABA
+              cellphone: '1233333'
+              email: jperez@gmail.com
+              organization: ""
+              roles:
+                - driver
+                - cook
+              cook:
+                availability:
+                  monday: true
+                  tuesday: true
+                  wednesday: true
+                  thursday: true
+                  friday: true
+                  saturday: true
+                  sunday: true
+                max_dishes: 20
+              driver:
+                availability:
+                  monday: true
+                  tuesday: true
+                  wednesday: true
+                  thursday: true
+                  friday: true
+                  saturday: true
+                  sunday: true
+                  morning: true
+                  afternoon: false
+                  evening: false
+                vehicle: car
+      responses:
+        200:
+          description: Profile was updated.
+          content:
+            application/json:
+              example:
+                user_id: 3
+                user_name: jperez
+                name: Juan
+                last_name: Perez
+                address:
+                  street: Arenales
+                  number: 2650
+                  floor_and_apartment: 2C
+                  extra_info: ''
+                  zip_code: ''
+                  neighborhood: Recoleta
+                  commune: ''
+                  city: CABA
+                  province: CABA
+                cellphone: '1233333'
+                email: jperez@gmail.com
+                roles:
+                  - driver
+                  - cook
+                cook:
+                  availability:
+                    monday: true
+                    tuesday: true
+                    wednesday: true
+                    thursday: true
+                    friday: true
+                    saturday: true
+                    sunday: true
+                  max_dishes: 20
+                driver:
+                  availability:
+                    monday: true
+                    tuesday: true
+                    wednesday: true
+                    thursday: true
+                    friday: true
+                    saturday: true
+                    sunday: true
+                    morning: true
+                    afternoon: false
+                    evening: false
+                  vehicle: car
+                
+        400:
+          description: Validation failed
+      security:
+        - bearerAuth: []
+  /users/{user_id}/password:
+     put:
+      tags:
+      - users
+      summary: Updates the password of a user.
+      description: Updates the password of a user.
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Password change
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordChangeData'
+            example:
+              password: secreto1234
+              
+      responses:
+        200:
+          description: Password was updated
+          content:
+            application/json:
+              example:
+      security:
+        - bearerAuth: []
+        
+  /users/password/reset:
+     post:
+      tags:
+      - users
+      summary: Resets a user's password
+      description: Resets the password of a user and emails the new temporary password to the user.
+      requestBody:
+        description: Password reset
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetData'
+            example:
+              email: juan.perez@gmail.com
+              
+      responses:
+        200:
+          description: Password was reseted.
+          content:
+            application/json:
+              example:
+
+                
+  /users/{user_id}/groups:
+    get:
+      tags:
+      - users
+      summary: "Shows the groups of a user"
+      description: "Shows all the groups where the user is in."
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: "A user's groups"
+          content:
+            application/json:
+              example:
+                groups:
+                  - group_id: 2
+                    name: "Masterchef"
+                    member_count: 3
+                    cook_count: 1
+                    delegate_count: 1
+                    driver_count: 1
+                    roles:
+                      - cook
+                  - group_id: 1
+                    name: "Cocinando por un sueño"
+                    member_count: 3
+                    cook_count: 1
+                    delegate_count: 1
+                    driver_count: 1
+                    roles:
+                      - delegate
+                      - cook
+      security:
+        - bearerAuth: []
+  /groups/{group_id}:
+    get:
+      tags:
+      - groups
+      summary: "Shows the detail of a group"
+      description: "Shows all the users inside a group 'members' is guaranteed to be sorted by user_id. Cook: see teammates with username and role. Driver: see teammates with username, role and address Delegate: see teammates with username, role and address."
+      parameters:
+        - name: group_id
+          in: path
+          description: "Group ID"
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: "The detail of a group"
+          content:
+            application/json:
+              example:
+                name: palermo
+                group_id: 1
+                member_count: 2
+                role_count: 3
+                members:
+                  - user_id: 2
+                    user_name: joak
+                    name: joaco
+                    last_name: mansilla
+                    address:
+                      street: ''
+                      number: 0
+                      floor_and_apartment: ''
+                      extra_info: ''
+                      zip_code: ''
+                      neighborhood: ''
+                      commune: ''
+                      city: ''
+                      province: ''
+                      latitude: 0
+                      longitude: 0
+                    cellphone: '123123123'
+                    email: joakitooou@gmail.com
+                    roles_in_group:
+                      - role: delegate
+                        ack_delegate: true
+                      - role: cook
+                        ack_delegate: true
+                    cook: null
+                    driver: null
+                  - user_id: 3
+                    user_name: jperez
+                    name: Juan
+                    last_name: Perez
+                    address:
+                      street: Arenales
+                      number: 2600
+                      floor_and_apartment: 2H
+                      extra_info: ''
+                      zip_code: '1430'
+                      neighborhood: Recoleta
+                      commune: Comuna 1
+                      city: CABA
+                      province: CABA
+                      latitude: 0
+                      longitude: 0
+                    cellphone: '1144445555'
+                    email: jperez@gmail.com
+                    roles_in_group:
+                      - role: cook
+                        ack_delegate: false
+                    cook: null
+                    driver: null
+      security:
+        - bearerAuth: []
+        
+  /admin/groups:
+    get:
+      tags:
+      - admin/groups
+      summary: "Shows all the groups"
+      description: "Lists all the groups with a summary. Page and page size are yet to be implemented. Page is the page number starting from one, page size is the size of each page. If page is empty or not set, it will return all the records. The default for page_size is 30. Note: For this version and this endpoint, the field 'role' is an empty list and should be ignored."
+      parameters:
+        - name: page
+          in: query
+          description: "Page"
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: page_size
+          in: query
+          description: "Page size"
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: "A user's groups"
+          content:
+            application/json:
+              example:
+                total_groups: 10
+                total_pages: 3
+                groups:
+                  - group_id: 3
+                    name: En este grupo se cocinan sandwiches de vacío
+                    role_count:
+                      cook: 0
+                      delegate: 0
+                      driver: 0
+                    member_count: 0
+                    average_latitude: 0
+                    average_longitude: 0
+                    roles: []
+                  - group_id: 2
+                    name: Masterchef
+                    role_count:
+                      cook: 3
+                      delegate: 1
+                      driver: 0
+                    roles: []
+                    member_count: 3
+                    average_latitude: -34.58335774938697
+                    average_longitude: -58.428284523439366
+                  - group_id: 1
+                    name: Cocinando por un sueño
+                    role_count:
+                      cook: 3
+                      delegate: 1
+                      driver: 0
+                    roles: []
+                    member_count: 4
+                    average_latitude: -34.57939794436142
+                    average_longitude: -58.43594150411851
+      security:
+        - bearerAuth: []
+    post:
+      tags:
+      - admin/groups
+      summary: Creates a group
+      description: "Creates a new group with a name (required) and the user-roles. Must be admin. User-roles to add must be valid and different."
+      requestBody:
+        description: New group data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewGroupData'
+            example:
+              name: Otro grupo
+              users:
+                - user_id: 4
+                  role: cook
+                - user_id: 5
+                  role: cook
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              example:
+                group_id: 3
+                
+        400:
+          description: Bad request (validation failed)
+          content:  {}
+        403:
+          description: User is not admin
+          content: {}
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+      - admin/groups
+      summary: Deletes a group
+      description: "Deletes a group. Must be admin, returns 403 if not. Returns 404 if the group to be deleted is not found. Returns 200 if it is successful."
+      responses:
+        200:
+          description: Deleted
+          content: {}
+        403:
+          description: The user is not admin
+          content: {}
+        404:
+          description: The group does not exist
+          content: {}
+      security:
+        - bearerAuth: []     
+      
+    put:
+      tags:
+      - admin/groups
+      summary: Modifies a group
+      description: "Updates a group with the name (required) and the user-roles to add or delete. Must be admin. Validations: User-roles to add or delete must be valid and different. User-roles to add to the group cannot be in the group. User-roles to remove from the group must be in the group."
+      requestBody:
+        description: Modified group data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModifiedGroupData'
+            example:
+              name: The best group ever
+              users_to_add:
+                - user_id: 3
+                  role: delegate
+              users_to_remove:
+                - user_id: 4
+                  role: cook
+                - user_id: 5
+                  role: cook
+      responses:
+        200:
+          description: Ok, updated
+          content:
+            application/json:
+              example:
+                group_id: 3
+        400:
+          description: Bad request (validation failed)
+          content:  {}
+        403:
+          description: User is not admin
+          content: {}     
+        404:
+          description: The group does not exist.
+          content: {}
+      security:
+        - bearerAuth: []
+        
+  /admin/groups/combine:
+    post:
+      tags:
+      - admin/groups
+      summary: Combines two groups
+      description: "Allows to combine two groups"
+      requestBody:
+        description: Group combination data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupCombinationData'
+            example:
+              new_group_name: Combinadoo!
+              first_group_id: 3
+              second_group_id: 5
+      responses:
+        200:
+          description: ""
+          content: {}
+      security:
+        - bearerAuth: []
+        
+  /admin/groups/inactivate:
+    delete:
+      tags:
+      - admin/groups
+      summary: Deletes a group, inactivating all of its members
+      description: "Deletes a group and inactivates its members. In a future version the DELETE admin/groups endpoint may be extended to replace this endpoint."
+      responses:
+        200:
+          description: Deleted
+          content: {}
+        403:
+          description: The user is not admin
+          content: {}
+        404:
+          description: The group does not exist
+          content: {}
+      security:
+        - bearerAuth: []
+
+  /admin/users:
+    get:
+      tags:
+      - admin/users
+      summary: Lists users
+      description: "List all the users. Allows to filter by role, location and availability (a user is available if they are not in any group). See also GET /admin/users/roles Pagination is not implemented yet. Page is the page number starting from one, page size is the size of each page. If page is empty or not set, it will return all the records. The default for page_size is 30."
+      parameters:
+        - name: role
+          in: query
+          description: "Role"
+          required: false
+          schema:
+            type: string
+        - name: province
+          in: query
+          description: "Province"
+          required: false
+          schema:
+            type: string
+        - name: city
+          in: query
+          description: "City"
+          required: false
+          schema:
+            type: string
+        - name: neighborhood
+          in: query
+          description: "Neighborhood"
+          required: false
+          schema:
+            type: string
+        - name: only_available
+          in: query
+          description: "List only available users? True by default"
+          required: false
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          description: "Page"
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: page_size
+          in: query
+          description: "Page size"
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              example:
+                total_users: 10
+                total_pages: 3
+                users:
+                  - user_name: admin
+                    user_id: 2
+                    roles_in_groups_count: 0
+                    roles:
+                      - admin
+                    name: admin
+                    last_name: admin
+                    address:
+                      street: Calle Falsa
+                      number: 123
+                      floor_and_apartment: ''
+                      extra_info: ''
+                      zip_code: ''
+                      neighborhood: ''
+                      commune: ''
+                      city: ''
+                      province: ''
+                      latitude: 0
+                      longitude: 0
+                    cellphone: ''
+                    email: admin@gmail.com
+                  - user_name: joak
+                    user_id: 3
+                    roles_in_groups_count: 3
+                    roles:
+                      - cook
+                      - delegate
+                      - driver
+                    name: admin
+                    last_name: admin
+                    address:
+                      street: Calle Falsa
+                      number: 123
+                      floor_and_apartment: ''
+                      extra_info: ''
+                      zip_code: ''
+                      neighborhood: ''
+                      commune: ''
+                      city: ''
+                      province: ''
+                      latitude: -34.393431929272478
+                      longitude: -58.4546313935496746
+                    cellphone: ''
+                    email: joak@gmail.com
+                
+      security:
+        - bearerAuth: []
+        
+  /admin/users/roles:
+    get:
+      tags:
+      - admin/users
+      summary: Lists users
+      description: "List all the user-roles. Allows to filter by role, location and availability (a user is available if they are not in any group). See also GET /admin/users Pagination is not implemented yet. Page is the page number starting from one, page size is the size of each page. If page is empty or not set, it will return all the records. The default for page_size is 30."
+      parameters:
+        - name: role
+          in: query
+          description: "Role"
+          required: false
+          schema:
+            type: string
+        - name: province
+          in: query
+          description: "Province"
+          required: false
+          schema:
+            type: string
+        - name: city
+          in: query
+          description: "City"
+          required: false
+          schema:
+            type: string
+        - name: neighborhood
+          in: query
+          description: "Neighborhood"
+          required: false
+          schema:
+            type: string
+        - name: only_available
+          in: query
+          description: "List only available user roles? True by default"
+          required: false
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          description: "Page"
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: page_size
+          in: query
+          description: "Page size"
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              example:
+                total_user_roles: 10
+                total_pages: 3
+                user_roles:
+                  - user_role_id: 1
+                    user_name: admin
+                    user_id: 2
+                    roles_in_groups_count: 0
+                    role: admin
+                    name: admin
+                    last_name: admin
+                    address:
+                      street: Calle Falsa
+                      number: 123
+                      floor_and_apartment: ''
+                      extra_info: ''
+                      zip_code: ''
+                      neighborhood: ''
+                      commune: ''
+                      city: ''
+                      province: ''
+                      latitude: 0
+                      longitude: 0
+                    cellphone: ''
+                    email: admin@gmail.com
+                  - user_role_id: 3
+                    user_name: joak
+                    user_id: 3
+                    roles_in_groups_count: 3
+                    role: cook
+                    name: admin
+                    last_name: admin
+                    address:
+                      street: Calle Falsa
+                      number: 123
+                      floor_and_apartment: ''
+                      extra_info: ''
+                      zip_code: ''
+                      neighborhood: ''
+                      commune: ''
+                      city: ''
+                      province: ''
+                      latitude: -34.59351929272478
+                      longitude: -58.423613935496746
+                    cellphone: ''
+                    email: joak@gmail.com
+      security:
+        - bearerAuth: []                
+                    
+                    
+  /admin/users/{user_id}/roles:
+    post:
+      tags:
+      - admin/users
+      summary: Adds a role to a user
+      description: "Adds a role to a user. Por ahora no permitimos que role sea “admin”, esto puede cambiar más adelante."
+      requestBody:
+        description: New role
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewRoleData'
+            example:
+              role: "delegate"
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Ok
+          content: {}
+      security:
+        - bearerAuth: []         
+    
+  /delegate/ack/{group_id}:
+    post:
+      tags:
+      - delegate
+      summary: Acknowledge of new member in group
+      description: "A Delegate can use this endpoint to acknowledge that a new member joined their group."
+      requestBody:
+        description: User role
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRole'
+            example:
+              user_id: 123
+              role: cook
+      parameters:
+        - name: group_id
+          in: path
+          description: Group ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Ok
+          content: {}
+        403:
+          description: User is not delegate in that group.
+          content: {}
+      security:
+        - bearerAuth: []         
+    
+
+  /delegate/remove/{group_id}:
+    delete:
+      tags:
+      - delegate
+      summary: Deletes a user-role from a group
+      description: "A Delegate can use this endpoint to remove a user in a specific role from their group."
+      requestBody:
+        description: User role
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRole'
+            example:
+              user_id: 123
+              role: cook
+      parameters:
+        - name: group_id
+          in: path
+          description: Group ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Ok
+          content: {}
+        403:
+          description: User is not delegate in that group.
+          content: {}
+      security:
+        - bearerAuth: []       
+      
+  /delegate/deactivate/{group_id}:
+    delete:
+      tags:
+      - delegate
+      summary: Deletes a user-role from a group and inactivates the user
+      description: "A Delegate can use this endpoint to remove a user in a specific role from their group and inactivate the user."
+      requestBody:
+        description: User role
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRole'
+            example:
+              user_id: 123
+              role: cook
+      parameters:
+        - name: group_id
+          in: path
+          description: Group ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Ok
+          content: {}
+        403:
+          description: User is not delegate in that group.
+          content: {}
+      security:
+        - bearerAuth: []       
+  
+  /activation/{user_id}/send-offer:
+    post:
+      tags:
+      - activation
+      summary: "Sends a reactivation offer to a user"
+      description: "User must be inactive. It is not possible to send another offer within 3 months of the last offer. This endpoint can only be used by an admin."
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: "OK/User is already active/Reactivation offer already sent in the last 3 months"
+          content: {}
+        404:
+          description: User not found
+          content: {}
+      security:
+      - bearerAuth: []   
+  /activation/{user_id}/h/{hash}:
+    get:
+      tags:
+      - activation
+      summary: "Reactivates a user."
+      description: "A user can use this endpoint to reactivate their account. The purpose of this endpoint is to send reactivation offer emails: the user is activated by just clicking a link. Authentication is provided by the hash parameter."
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+        - name: hash
+          in: path
+          description: Hash
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              example:
+                "¡Te contactaremos a la brevedad!"
+                
+  /search/users/{text}:
+    get:
+      tags:
+      - search
+      summary: Returns users matching a text
+      description: "The text is compared to user_id, username, name, last_name and cellphone. User must be admin to use this endpoint."
+      parameters:
+        - name: text
+          in: path
+          description: Text
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              example:
+                - user_id: 1
+                  text: "24: Juan08 (Juan Perez) 123123456"
+      security:
+        - bearerAuth: [] 
+      
+components:
+  schemas:
+  
+    LoginData:
+      type: object
+      properties:
+        user_name:
+          type: string
+        password:
+          type: string
+          
+    RegistrationData:
+      type: object
+      properties:
+        user_name:
+          type: string
+        password:
+          type: string
+        name:
+          type: string
+        lastname:
+          type: string
+        address:
+          type: object
+          properties:
+            street:
+              type: string
+            number:
+              type: integer
+            floor_and_apartment:
+              type: string
+            extra_info: 
+             type: string
+            zip_code:
+              type: string
+            neighborhood:
+              type: string
+            city:
+              type: string
+            province:
+              type: string
+        cellphone: 
+          type: string
+        email:
+          type: string
+        organization:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+        driver:
+          type: object
+          properties:
+            vehicle:
+              type: string
+            availability:
+              type: object
+        cook:
+          type: object
+          properties:
+            max_dishes:
+              type: integer
+            availability:
+              type: object
+              
+    UpdateUserProfileData:
+      type: object
+      properties:
+        user_name:
+          type: string
+        name:
+          type: string
+        lastname:
+          type: string
+        address:
+          type: object
+          properties:
+            street:
+              type: string
+            number:
+              type: integer
+            floor_and_apartment:
+              type: string
+            extra_info: 
+             type: string
+            zip_code:
+              type: string
+            neighborhood:
+              type: string
+            city:
+              type: string
+            province:
+              type: string
+        cellphone: 
+          type: string
+        email:
+          type: string
+        organization:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+        driver:
+          type: object
+          properties:
+            vehicle:
+              type: string
+            availability:
+              type: object
+        cook:
+          type: object
+          properties:
+            max_dishes:
+              type: integer
+            availability:
+              type: object
+
+    PasswordChangeData:
+      type: object
+      properties:
+        old_password:
+          type: string
+        new_password:
+          type: string
+          
+    PasswordResetData:
+      type: object
+      properties:
+        email:
+          type: string 
+    
+    UserRole:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        role:
+          type: string
+      
+    NewGroupData:
+      type: object
+      properties:
+        name:
+          type: string
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserRole'
+
+    ModifiedGroupData:
+      type: object
+      properties:
+        name:
+          type: string
+        users_to_add:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserRole'
+        users_to_remove:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserRole'
+
+    GroupCombinationData:
+      type: object
+      properties:
+        new_group_name:
+          type: string
+        first_group_id:
+          type: integer
+        second_group_id:
+          type: integer
+    NewRoleData:
+      type: object
+      properties:
+        role:
+          type: string
+        
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

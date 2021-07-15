@@ -1,2 +1,1 @@
-# convidarte-api-docs
-Convidarte API documentation
+# Convidarte API documentation

@@ -32,6 +32,8 @@ tags:
   description: Activation endpoints
 - name: search
   description: search endpoints
+- name: information
+  description: information endpoints
 
 paths:
   /auth/login:
@@ -1151,7 +1153,54 @@ paths:
                   text: "24: Juan08 (Juan Perez) 123123456"
       security:
         - bearerAuth: [] 
-      
+        
+  /information/delegates:
+    get:
+      tags:
+      - information
+      summary: Groups and their delegates
+      description: "Returns some information of the groups and the delegates.  User must be admin or delegate."
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              example:
+                groups:
+                  - group_id: 96
+                    name: "recoleta"
+                    delegates:
+                      - user_id: 123
+                        name: "Juana"
+                        last_name: "Perez"
+                        user_name: "Juana1"
+                        cellphone: "123123456"
+                        group_id: 96
+                      - user_id: 100
+                        name: "José"
+                        last_name: "Gomez"
+                        user_name: "Pepe"
+                        cellphone: "44444444"
+                        group_id: 96
+                    pending_ack_count: 1
+                    member_count: 10
+                  - group_id: 82
+                    name: palermo
+                    delegates:
+                      - user_id: 1234
+                        name: "Laura"
+                        last_name: ""
+                        username: "Laura"
+                        cellphone: "12345555"
+                        group_id: 82
+                    pending_ack_count: 3
+                    member_count: 128
+
+        403:
+          description: Forbidden (user is not delegate or admin)
+      security:
+        - bearerAuth: [] 
+    
 components:
   schemas:
   

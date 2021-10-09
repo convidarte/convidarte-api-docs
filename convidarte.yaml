@@ -210,14 +210,14 @@ paths:
                 name: Juan
                 last_name: Perez
                 address:
-                street: Arenales
-                number: 2650
-                floor_and_apartment: 2C
-                extra_info: ''
-                zip_code: ''
-                neighborhood: Recoleta
-                city: CABA
-                province: CABA
+                  street: Arenales
+                  number: 2650
+                  floor_and_apartment: 2C
+                  extra_info: ''
+                  zip_code: ''
+                  neighborhood: Recoleta
+                  city: CABA
+                  province: CABA
                 cellphone: '1233333'
                 email: "jperez@gmail.com"
                 roles:

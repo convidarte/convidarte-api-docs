@@ -1153,6 +1153,39 @@ paths:
                   text: "24: Juan08 (Juan Perez) 123123456"
       security:
         - bearerAuth: [] 
+
+  /information/phonebook:
+    get:
+      tags:
+      - information
+      summary: Phonebook
+      description: "Returns a phonebook.  User must be admin or delegate."
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              example:
+                phonebook:
+                  - user_id: 123
+                    name: "Juan"
+                    last_name: "Perez"
+                    user_name: "JuanPerez"
+                    cellphone: "123123456"
+                    position: "Coordinador"
+                    description: "Coordina estas áreas: 1, 5 y 6."
+                  - user_id: 222
+                    name: "Juana"
+                    last_name: "Lopez"
+                    user_name: "JuanaLopez"
+                    cellphone: "4444444"
+                    position: "Coordinador"
+                    description: "Coordina estas áreas: 2, 3 y 4."
+
+        403:
+          description: Forbidden (user is not delegate or admin)
+      security:
+        - bearerAuth: [] 
         
   /information/delegates:
     get:
